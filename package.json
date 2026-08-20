@@ -20,11 +20,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bradennss/pi-claude-max-extension.git"
+    "url": "git+https://github.com/bradennss/pi-claude-max.git"
   },
-  "homepage": "https://github.com/bradennss/pi-claude-max-extension#readme",
+  "homepage": "https://github.com/bradennss/pi-claude-max#readme",
   "bugs": {
-    "url": "https://github.com/bradennss/pi-claude-max-extension/issues"
+    "url": "https://github.com/bradennss/pi-claude-max/issues"
   },
   "exports": {
     ".": {

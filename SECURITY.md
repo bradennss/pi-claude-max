@@ -14,4 +14,4 @@ This extension makes Pi identify to Anthropic's API the way the official Claude 
 
 ## Reporting a vulnerability
 
-Please report suspected vulnerabilities privately via a [GitHub security advisory](https://github.com/bradennss/pi-claude-max-extension/security/advisories/new) or by email to hi@braden.lol. You will receive an acknowledgement within a few days.
+Please report suspected vulnerabilities privately via a [GitHub security advisory](https://github.com/bradennss/pi-claude-max/security/advisories/new) or by email to hi@braden.lol. You will receive an acknowledgement within a few days.

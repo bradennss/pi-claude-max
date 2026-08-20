@@ -11,7 +11,7 @@ A [Pi](https://pi.dev) extension that routes Anthropic OAuth requests through yo
 pi install npm:pi-claude-max
 
 # or from git
-pi install git:github.com/bradennss/pi-claude-max-extension
+pi install git:github.com/bradennss/pi-claude-max
 
 # try it for a single run without installing
 pi -e npm:pi-claude-max
