@@ -1,9 +1,7 @@
 import { expect, test } from "vitest";
 import {
-  DEFAULT_CLAUDE_CODE_VERSION,
   billingAttribution,
   computeFingerprint,
-  resolveClaudeCodeVersion,
   userAgent,
 } from "../src/billing.ts";
 
@@ -33,22 +31,4 @@ test("billingAttribution renders the exact header line", () => {
   ).toBe(
     "x-anthropic-billing-header: cc_version=2.1.211.f82; cc_entrypoint=cli;",
   );
-});
-
-test("resolveClaudeCodeVersion honors a valid override", () => {
-  expect(resolveClaudeCodeVersion({ PI_CLAUDE_MAX_CC_VERSION: "2.2.0" })).toBe(
-    "2.2.0",
-  );
-});
-
-test("resolveClaudeCodeVersion rejects malformed overrides", () => {
-  for (const bad of ["latest", "2.1", "v2.1.211", "", "  "]) {
-    expect(resolveClaudeCodeVersion({ PI_CLAUDE_MAX_CC_VERSION: bad })).toBe(
-      DEFAULT_CLAUDE_CODE_VERSION,
-    );
-  }
-});
-
-test("resolveClaudeCodeVersion defaults when unset", () => {
-  expect(resolveClaudeCodeVersion({})).toBe(DEFAULT_CLAUDE_CODE_VERSION);
 });

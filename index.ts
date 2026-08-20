@@ -1,12 +1,9 @@
 /**
  * pi-claude-max routes Anthropic OAuth requests to Claude Pro/Max subscription
  * billing.
- *
- * PI_CLAUDE_MAX_CC_VERSION sets the version. PI_CLAUDE_MAX_DISABLE=1 turns the
- * extension off.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { resolveClaudeCodeVersion, userAgent } from "./src/billing.ts";
+import { DEFAULT_CLAUDE_CODE_VERSION, userAgent } from "./src/billing.ts";
 import {
   isOAuthClaudeCodeSystem,
   type MessageLike,
@@ -14,9 +11,7 @@ import {
 } from "./src/system-prompt.ts";
 
 export default function claudeMax(pi: ExtensionAPI): void {
-  if (process.env.PI_CLAUDE_MAX_DISABLE === "1") return;
-
-  const version = resolveClaudeCodeVersion();
+  const version = DEFAULT_CLAUDE_CODE_VERSION;
   const ua = userAgent(version);
 
   pi.on("before_provider_headers", (event, ctx) => {

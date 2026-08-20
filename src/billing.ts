@@ -6,27 +6,16 @@ export const CLAUDE_CODE_IDENTITY =
   "You are Claude Code, Anthropic's official CLI for Claude.";
 
 const FINGERPRINT_SALT = "59cf53e54c78";
-const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
-
-export function resolveClaudeCodeVersion(
-  env: NodeJS.ProcessEnv = process.env,
-): string {
-  const override = env.PI_CLAUDE_MAX_CC_VERSION?.trim();
-
-  return override && VERSION_PATTERN.test(override)
-    ? override
-    : DEFAULT_CLAUDE_CODE_VERSION;
-}
 
 export function userAgent(
-  version: string = resolveClaudeCodeVersion(),
+  version: string = DEFAULT_CLAUDE_CODE_VERSION,
 ): string {
   return `claude-cli/${version} (external, cli)`;
 }
 
 export function computeFingerprint(
   firstUserMessageText: string,
-  version: string = resolveClaudeCodeVersion(),
+  version: string = DEFAULT_CLAUDE_CODE_VERSION,
 ): string {
   const sampled = [4, 7, 20]
     .map((i) => firstUserMessageText[i] || "0")
@@ -40,7 +29,7 @@ export function computeFingerprint(
 
 export function billingAttribution(
   firstUserMessageText: string,
-  version: string = resolveClaudeCodeVersion(),
+  version: string = DEFAULT_CLAUDE_CODE_VERSION,
 ): string {
   const fingerprint = computeFingerprint(firstUserMessageText, version);
   return `x-anthropic-billing-header: cc_version=${version}.${fingerprint}; cc_entrypoint=cli;`;

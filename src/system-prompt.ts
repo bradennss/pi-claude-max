@@ -1,7 +1,7 @@
 import {
   CLAUDE_CODE_IDENTITY,
+  DEFAULT_CLAUDE_CODE_VERSION,
   billingAttribution,
-  resolveClaudeCodeVersion,
 } from "./billing.ts";
 
 export interface SystemBlock {
@@ -28,7 +28,7 @@ export interface RelocatedPayload {
 export function relocateSystemToUser(
   system: SystemBlock[],
   messages: readonly MessageLike[] = [],
-  version: string = resolveClaudeCodeVersion(),
+  version: string = DEFAULT_CLAUDE_CODE_VERSION,
 ): RelocatedPayload {
   const attribution = billingAttribution(
     extractFirstUserMessageText(messages),
