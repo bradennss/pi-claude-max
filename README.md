@@ -30,13 +30,6 @@ Then, optionally, silence the extra-usage warning by adding to `~/.pi/agent/sett
 - Pi authenticated with an Anthropic OAuth token via `/login anthropic`.
 - Node.js >= 20.
 
-## Configuration
-
-| Environment variable | Effect |
-| --- | --- |
-| `PI_CLAUDE_MAX_CC_VERSION` | Override the advertised Claude Code version. Must be `x.y.z`. |
-| `PI_CLAUDE_MAX_DISABLE=1` | Load the extension and do nothing. |
-
 ## Development
 
 ```bash

@@ -1,21 +1,17 @@
 /**
- * pi-claude-max - Route Anthropic OAuth requests through Claude Pro/Max
- * subscription billing.
- *
- * Env: PI_CLAUDE_MAX_CC_VERSION overrides the version; PI_CLAUDE_MAX_DISABLE=1 no-ops.
+ * pi-claude-max routes Anthropic OAuth requests to Claude Pro/Max subscription
+ * billing.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { resolveClaudeCodeVersion, userAgent } from "./src/billing.ts";
+import { DEFAULT_CLAUDE_CODE_VERSION, userAgent } from "./src/billing.ts";
 import {
   isOAuthClaudeCodeSystem,
   type MessageLike,
-  mergeSystemBlocks,
+  relocateSystemToUser,
 } from "./src/system-prompt.ts";
 
 export default function claudeMax(pi: ExtensionAPI): void {
-  if (process.env.PI_CLAUDE_MAX_DISABLE === "1") return;
-
-  const version = resolveClaudeCodeVersion();
+  const version = DEFAULT_CLAUDE_CODE_VERSION;
   const ua = userAgent(version);
 
   pi.on("before_provider_headers", (event, ctx) => {
@@ -30,13 +26,11 @@ export default function claudeMax(pi: ExtensionAPI): void {
       messages?: readonly MessageLike[];
     };
     if (!isOAuthClaudeCodeSystem(payload.system)) return undefined;
-    return {
-      ...payload,
-      system: mergeSystemBlocks(
-        payload.system,
-        payload.messages ?? [],
-        version,
-      ),
-    };
+    const { system, messages } = relocateSystemToUser(
+      payload.system,
+      payload.messages ?? [],
+      version,
+    );
+    return { ...payload, system, messages };
   });
 }

@@ -4,7 +4,7 @@ import {
   type SystemBlock,
   extractFirstUserMessageText,
   isOAuthClaudeCodeSystem,
-  mergeSystemBlocks,
+  relocateSystemToUser,
 } from "../src/system-prompt.ts";
 
 const oauthSystem: SystemBlock[] = [
@@ -44,32 +44,63 @@ test("extractFirstUserMessageText handles string and block content", () => {
   expect(extractFirstUserMessageText([])).toBe("");
 });
 
-test("mergeSystemBlocks collapses to one block with attribution + identity + user text", () => {
+test("relocateSystemToUser keeps only attribution + identity in system", () => {
   const messages = [
     { role: "user", content: "Reply with the single word: pong" },
   ];
-  const merged = mergeSystemBlocks(oauthSystem, messages, "2.1.211");
-  expect(merged.length).toBe(1);
-  expect(merged[0].text).toBe(
-    "x-anthropic-billing-header: cc_version=2.1.211.f82; cc_entrypoint=cli;\n\n" +
-      `${CLAUDE_CODE_IDENTITY}\n\n` +
-      "You are an expert coding assistant.",
+  const { system } = relocateSystemToUser(oauthSystem, messages, "2.1.211");
+  expect(system.length).toBe(2);
+  expect(system[0].text).toBe(
+    "x-anthropic-billing-header: cc_version=2.1.211.f82; cc_entrypoint=cli;",
+  );
+  expect(system[0].cache_control).toBeUndefined();
+  expect(system[1].text).toBe(CLAUDE_CODE_IDENTITY);
+  expect(system[1].cache_control).toEqual({ type: "ephemeral" });
+});
+
+test("relocateSystemToUser prepends the harness prompt to string user content", () => {
+  const { messages } = relocateSystemToUser(
+    oauthSystem,
+    [{ role: "user", content: "do the thing" }],
+    "2.1.211",
+  );
+  expect(messages.length).toBe(1);
+  expect(messages[0].content).toBe(
+    "<system-instructions>\nYou are an expert coding assistant.\n</system-instructions>\n\ndo the thing",
   );
 });
 
-test("mergeSystemBlocks preserves cache_control from the first block", () => {
-  const merged = mergeSystemBlocks(oauthSystem, [], "2.1.211");
-  expect(merged[0].cache_control).toEqual({ type: "ephemeral" });
+test("relocateSystemToUser unshifts a block into array user content", () => {
+  const { messages } = relocateSystemToUser(
+    oauthSystem,
+    [{ role: "user", content: [{ type: "text", text: "do the thing" }] }],
+    "2.1.211",
+  );
+  const content = messages[0].content as { type?: string; text?: string }[];
+  expect(content.length).toBe(2);
+  expect(content[0].text).toBe(
+    "<system-instructions>\nYou are an expert coding assistant.\n</system-instructions>",
+  );
+  expect(content[1].text).toBe("do the thing");
 });
 
-test("mergeSystemBlocks works when there is no user system block", () => {
+test("relocateSystemToUser leaves messages untouched when there is no user system block", () => {
   const single: SystemBlock[] = [{ type: "text", text: CLAUDE_CODE_IDENTITY }];
-  const merged = mergeSystemBlocks(
+  const { system, messages } = relocateSystemToUser(
     single,
     [{ role: "user", content: "x" }],
     "2.1.211",
   );
-  expect(merged.length).toBe(1);
-  expect(merged[0].text.endsWith(CLAUDE_CODE_IDENTITY)).toBe(true);
-  expect("cache_control" in merged[0]).toBe(false);
+  expect(system.length).toBe(2);
+  expect(system[1].text).toBe(CLAUDE_CODE_IDENTITY);
+  expect(messages[0].content).toBe("x");
+});
+
+test("relocateSystemToUser creates a user message when none exists", () => {
+  const { messages } = relocateSystemToUser(oauthSystem, [], "2.1.211");
+  expect(messages.length).toBe(1);
+  expect(messages[0].role).toBe("user");
+  expect(messages[0].content).toBe(
+    "<system-instructions>\nYou are an expert coding assistant.\n</system-instructions>",
+  );
 });
