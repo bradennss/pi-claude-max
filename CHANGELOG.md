@@ -1,5 +1,11 @@
 # pi-claude-max
 
+## 1.1.2
+
+### Patch Changes
+
+- [#7](https://github.com/bradennss/pi-claude-max/pull/7) [`739168c`](https://github.com/bradennss/pi-claude-max/commit/739168cccd8d08b1ef0d5aa425523b872144f9b6) Thanks [@felipeadeildo](https://github.com/felipeadeildo)! - Advertise Claude Code 2.1.280 instead of 2.1.211. Anthropic gates newer models on the Claude Code version a request reports and answers with a 400 `claude_code_version_too_old` below the per-model minimum, which for Claude Opus 5.5 is 2.1.280.
+
 ## 1.1.1
 
 ### Patch Changes
