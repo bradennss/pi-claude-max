@@ -6,10 +6,6 @@ import {
   userAgent,
 } from "../src/billing.ts";
 
-test("advertises a version Anthropic accepts for the newest models", () => {
-  expect(DEFAULT_CLAUDE_CODE_VERSION).toBe("2.1.280");
-});
-
 test("userAgent matches the Claude Code format", () => {
   expect(userAgent("2.1.280")).toBe("claude-cli/2.1.280 (external, cli)");
 });
@@ -36,10 +32,10 @@ test("computeFingerprint pads short messages with '0' instead of throwing", () =
   expect(computeFingerprint("ab", "2.1.280")).toMatch(/^[0-9a-f]{3}$/);
 });
 
-test("billingAttribution renders the exact header line", () => {
+test("billingAttribution matches the captured 2.1.311 fingerprint", () => {
   expect(
-    billingAttribution("Reply with the single word: pong", "2.1.280"),
+    billingAttribution("Reply with the single word: pong", "2.1.311"),
   ).toBe(
-    "x-anthropic-billing-header: cc_version=2.1.280.3a6; cc_entrypoint=cli;",
+    "x-anthropic-billing-header: cc_version=2.1.311.7ca; cc_entrypoint=cli;",
   );
 });

@@ -5,7 +5,7 @@ import {
 } from "./billing.ts";
 
 export interface SystemBlock {
-  type: string;
+  type: "text";
   text: string;
   cache_control?: unknown;
 }
@@ -15,65 +15,41 @@ export interface MessageLike {
   content?: string | { type?: string; text?: string }[];
 }
 
-export interface RelocatedPayload {
-  system: SystemBlock[];
-  messages: MessageLike[];
-}
-
-/**
- * Build a request that the Anthropic classifier bills to the Claude plan.
- * `system` holds the attribution and identity blocks. The harness system prompt
- * goes into the first user message, where the model reads and follows it.
- */
-export function relocateSystemToUser(
-  system: SystemBlock[],
+/** Keep the harness instructions and their cache boundaries at system priority. */
+export function buildClaudeCodeSystem(
+  system: readonly SystemBlock[],
   messages: readonly MessageLike[] = [],
   version: string = DEFAULT_CLAUDE_CODE_VERSION,
-): RelocatedPayload {
-  const attribution = billingAttribution(
-    extractFirstUserMessageText(messages),
-    version,
-  );
-  const cache = { type: "ephemeral" };
-  const newSystem: SystemBlock[] = [
-    { type: "text", text: attribution },
-    { type: "text", text: CLAUDE_CODE_IDENTITY, cache_control: cache },
+): SystemBlock[] {
+  return [
+    {
+      type: "text",
+      text: billingAttribution(extractFirstUserMessageText(messages), version),
+    },
+    ...system,
   ];
-  const userSystemText = system[1]?.text ?? "";
-  const relocated: MessageLike[] = messages.map((m) => ({ ...m }));
+}
 
-  if (userSystemText) {
-    const wrapped = `<system-instructions>\n${userSystemText}\n</system-instructions>`;
-    const firstUserIndex = relocated.findIndex((m) => m.role === "user");
-
-    if (firstUserIndex === -1) {
-      relocated.unshift({ role: "user", content: wrapped });
-    } else {
-      const target = relocated[firstUserIndex];
-
-      if (typeof target.content === "string") {
-        target.content = `${wrapped}\n\n${target.content}`;
-      } else if (Array.isArray(target.content)) {
-        target.content = [{ type: "text", text: wrapped }, ...target.content];
-      } else {
-        target.content = wrapped;
-      }
-    }
-  }
-  return { system: newSystem, messages: relocated };
+function isSystemBlock(block: unknown): block is SystemBlock {
+  return (
+    block !== null &&
+    typeof block === "object" &&
+    "type" in block &&
+    block.type === "text" &&
+    "text" in block &&
+    typeof block.text === "string"
+  );
 }
 
 /** True only for the Anthropic OAuth Claude Code system shape. */
 export function isOAuthClaudeCodeSystem(
   system: unknown,
 ): system is SystemBlock[] {
-  if (!Array.isArray(system) || system.length < 1) return false;
-  const first = system[0] as Partial<SystemBlock> | undefined;
-
   return (
-    first?.type === "text" &&
-    typeof first.text === "string" &&
-    first.text.startsWith(CLAUDE_CODE_IDENTITY)
+    Array.isArray(system) &&
+    system.length > 0 &&
+    system.every(isSystemBlock) &&
+    system[0].text === CLAUDE_CODE_IDENTITY
   );
 }
 
