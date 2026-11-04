@@ -1,5 +1,11 @@
 # pi-claude-max
 
+## 1.1.3
+
+### Patch Changes
+
+- [#9](https://github.com/bradennss/pi-claude-max/pull/9) [`3b90b66`](https://github.com/bradennss/pi-claude-max/commit/3b90b66cf8d5f6203986c4d8ae63bbd273af0633) Thanks [@bradennss](https://github.com/bradennss)! - Align OAuth request identity with Claude Code 2.1.311 and include Pi's session header. Preserve all harness system blocks and cache markers instead of relocating instructions into user messages. Leave API-key credential headers unchanged.
+
 ## 1.1.2
 
 ### Patch Changes
